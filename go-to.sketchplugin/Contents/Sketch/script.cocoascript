@@ -1,0 +1,103 @@
+// Tutorial: http://developer.sketchapp.com/introduction/
+// Reference: http://developer.sketchapp.com/reference/
+
+// Show the warning message about the animated zoom
+var showWarning = function() {
+	
+	var defs = [[NSUserDefaultsController sharedUserDefaultsController] defaults];
+	var animateZoom = defs.valueForKey("animateZoom"); 
+	var defsStandard = [NSUserDefaults standardUserDefaults]
+	var warningSeen = defsStandard.valueForKey("com.github.piffpaffpuff.go-to.animateZoomWarning")
+	if (animateZoom && !warningSeen) {
+	  var app = [NSApplication sharedApplication];
+	  [app displayDialog:"For best results with the Next or Previous Artboard action, uncheck 'Animate Zoom' in Sketch Preferences under the General tab." withTitle:"Animated Zoom"]
+	
+	  [defsStandard setObject: true forKey: "com.github.piffpaffpuff.go-to.animateZoomWarning"]
+	}
+	
+};
+
+// Global function to change the artboard
+var changeArtboard = function(context, direction) {
+	
+	var doc = context.document;
+	var plugin = context.plugin;
+	var page = doc.currentPage();
+	var view = doc.currentView();
+
+	var artboards = page.artboards();
+	var currentArtboard = page.currentArtboard();
+	var nextArtboard = null;
+	var currentArtboardIndex = 0;
+	var nextArtboardIndex = 0;
+	var indexIncrement = 0;
+	
+	var scrollOrigin = doc.scrollOrigin();
+	var zoom = doc.zoomValue();
+	var frame = view.frame();
+	var frameWidth = frame.size.width;
+	var frameHeight = frame.size.height;
+	
+	if(direction == "next") {
+		indexIncrement = -1;
+	} else {
+		indexIncrement = 1;
+	}
+
+	for(var i = 0; i < artboards.length(); i++) {
+		var artboard = artboards.objectAtIndex(i);
+		if(artboard.name() == currentArtboard.name()) {
+			currentArtboardIndex = i;
+			nextArtboardIndex = i + indexIncrement;
+			
+			if(nextArtboardIndex >= artboards.length()) {
+				nextArtboardIndex = 0;
+			} else if(nextArtboardIndex < 0) {
+				nextArtboardIndex = artboards.length() - 1;
+			} 
+			
+			break;
+		}
+	}
+	
+	nextArtboard = artboards.objectAtIndex(nextArtboardIndex);
+
+	var currentArtboardRect = currentArtboard.absoluteRect();
+	var nextArtboardRect = nextArtboard.absoluteRect();
+
+	page.deselectAllLayers();
+	[nextArtboard select:true byExpandingSelection:true];
+	
+	var newWidth = [nextArtboardRect width];
+	
+	// Keep the original zoom value
+	
+	// Keep the original x postition
+	// TODO: keep the x offset instead of centering
+	var newX = [nextArtboardRect x];
+
+	// Keep the original y postition
+	var newY = [nextArtboardRect y] - ([currentArtboardRect y] + scrollOrigin.y / zoom);
+	var newHeight = frameHeight / zoom;
+	var newRect = NSMakeRect(newX, newY, newWidth, newHeight);
+	
+	// Center new rect without animation
+	view.zoomToFitRect(newRect);	
+
+};
+
+// Go to the next artboad
+var onNextArtboard = function(context) {
+	
+	showWarning();
+	changeArtboard(context, "next");
+	  
+};
+
+// Go to the previous artboad
+var onPreviousArtboard = function(context) {
+	
+	showWarning();
+	changeArtboard(context, "previous");
+
+};
