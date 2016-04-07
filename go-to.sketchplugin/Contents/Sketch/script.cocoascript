@@ -1,5 +1,18 @@
-// Tutorial: http://developer.sketchapp.com/introduction/
-// Reference: http://developer.sketchapp.com/reference/
+/*
+ * Credits: Thanks to kenmoore for the great 
+ * artboard plugin, where this plugin is 
+ * based on. 
+ *
+ * https://github.com/kenmoore/sketch-artboard
+ *
+ * Info: Some links to learn more about how 
+ * to create a Sketch Plugin and the whole  
+ * code reference.
+ *
+ * http://developer.sketchapp.com/introduction/
+ * http://developer.sketchapp.com/reference/
+ *
+ */ 
 
 // Show the warning message about the animated zoom
 var showWarning = function() {
